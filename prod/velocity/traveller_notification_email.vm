@@ -1,0 +1,21 @@
+<html>
+ 
+<head></head>
+ 
+<body>
+<p>Thank you for filling out the Mauritius All-in-One Travel Digital Form</p>
+
+<p><b>Reference:</b> $locatorForm.serviceRequestId</p>
+
+<p>Your Mauritius All-in-One Travel Digital Form is attached to this email. You can print it out or save it on your mobile device. You will be asked to show it when you arrive in Mauritius, so make sure you can open your form before you arrive.</p>
+
+<p><b>Changes to your information</b></p>
+<p>If any of your information changes once you have submitted an application, such as travel details or seat number, you should navigate back to <a href='https://safemauritius.govmu.org'>https://safemauritius.govmu.org</a> and fill out a new form.</p>
+
+<p>PLEASE DO NOT REPLY TO THIS EMAIL</p>
+<p>This email was sent to $locatorForm.email from the Safe Mauritius team.</p>
+<p>For more information about the COVID-19 situation in Mauritius, please visit <a href="https://health.govmu.org/Pages/default.aspx">https://health.govmu.org/Pages/default.aspx</a></p>
+
+</body>
+ 
+</html>

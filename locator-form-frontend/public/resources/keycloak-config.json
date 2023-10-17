@@ -1,0 +1,8 @@
+{
+  "realm": "Airport",
+  "auth-server-url": "https://host.openelis.org/auth/",
+  "ssl-required": "external",
+  "resource": "locator-form",
+  "public-client": true,
+  "confidential-port": 0
+}

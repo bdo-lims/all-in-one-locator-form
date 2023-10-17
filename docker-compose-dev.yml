@@ -1,0 +1,111 @@
+version: '3.3'
+services:
+
+  locator-form-frontend:
+   image: locator-form
+   build:
+     context: ./locator-form-frontend
+     dockerfile: ./Dockerfile    
+   ports:
+     - 3000:3000
+   networks:
+     - frontend
+     - server-1  
+   volumes:
+     - './locator-form-frontend/src:/app/src'
+     - './locator-form-frontend/public:/app/public'
+     - ./dev/ssl/lf.crt:/etc/x509/https/tls.crt
+     - ./dev/ssl/lf.key:/etc/x509/https/tls.key
+   environment:
+     - CHOKIDAR_USEPOLLING=true
+   tty: true
+   
+  locator-form-data:
+    image: postgres:12-alpine
+    env_file:
+      - ./dev/database/database.env # configure postgres
+    ports:
+      - 25432:5432
+    volumes:
+      - locator-form-data:/var/lib/postgresql/data
+      - ./dev/database:/docker-entrypoint-initdb.d
+    networks:
+      - server-1
+    
+  fhir.openelis.org:
+    image: hapiproject/hapi:v5.4.1
+    restart: always
+    environment: 
+      SPRING_CONFIG_LOCATION: file:///data/hapi/application.yaml
+    ports:
+      - 8448:8443
+    networks:
+      - frontend
+      - server-1  
+    extra_hosts:
+#    this should be the loopback to the docker host. 
+#    run 
+#    /sbin/ip route|awk '/default/ { print $3 }' 
+#    inside the container to make sure the ip address is correct
+#    make sure connections to 8446 are allowed by your firewall
+      - host.openelis.org:172.20.0.1
+    volumes:
+      - ./dev/properties/application.yaml:/data/hapi/application.yaml
+      - ./dev/tomcat/hapi_server.xml:/usr/local/tomcat/conf/server.xml
+      - ./dev/ssl/lf.keystore:/usr/local/tomcat/certs/keystore
+      - ./dev/ssl/lf.truststore:/usr/local/tomcat/certs/truststore
+
+#  locator-form.openelis.org:
+#    image: locator-form-webapp
+#    build:
+#      context: ./locator-form-webapp
+#      dockerfile: docker/docker-build/Dockerfile
+#    ports:
+#      - 8449:8449
+#    networks:
+#      - server-1
+#    extra_hosts:
+#    this should be the loopback to the docker host. 
+#    run 
+#    /sbin/ip route|awk '/default/ { print $3 }' 
+#    inside the container to make sure the ip address is correct
+#    make sure connections to 8449 are allowed by your firewall
+#      - host.openelis.org:172.20.0.1
+#    volumes:
+#      - ./dev/ssl/lf.keystore:/usr/local/tomcat/certs/keystore
+#      - ./dev/ssl/lf.truststore:/usr/local/tomcat/certs/truststore
+      
+      
+  auth.openelis.org:
+    image:
+      quay.io/keycloak/keycloak:15.0.2
+    restart: always
+    environment:
+      KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DB_VENDOR: postgres
+      DB_ADDR: locator-form-data
+      DB_PORT: 5432
+      DB_DATABASE: locator-form
+      DB_SCHEMA: keycloak
+      DB_USER: lf_user
+      DB_PASSWORD: lf_password
+    ports:
+      - 8083:8080
+      - 8446:8443
+    networks:
+      - frontend
+      - server-1
+    volumes:
+      - ./dev/ssl/lf.crt:/etc/x509/https/tls.crt
+      - ./dev/ssl/lf.key:/etc/x509/https/tls.key
+      - ./dev/keycloak:/opt/jboss/keycloak/imports
+ 
+networks:
+  frontend:
+  server-1:
+  
+volumes:
+  locator-form-data:
+  
